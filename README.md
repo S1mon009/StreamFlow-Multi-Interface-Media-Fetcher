@@ -1,4 +1,5 @@
 # YouTube Downloader CLI
+![Static Badge](https://img.shields.io/badge/python-python?style=for-the-badge&logo=python&logoColor=%23fefefe&color=%233776AB) ![Static Badge](https://img.shields.io/badge/env-env?style=for-the-badge&logo=dotenv&logoColor=%23333&color=%23ECD53F) ![Static Badge](https://img.shields.io/badge/pydantic-pydantic?style=for-the-badge&logo=pydantic&logoColor=%23fefefe&color=%23E92063) ![Static Badge](https://img.shields.io/badge/youtube-youtube?style=for-the-badge&logo=youtube&logoColor=%23fefefe&color=%23FF0000)
 
 A command-line interface (CLI) tool for downloading YouTube videos and playlists with ease, supporting resolution selection, output format conversion, and automatic handling of age-restricted content via browser cookies.
 
