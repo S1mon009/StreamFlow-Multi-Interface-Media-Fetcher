@@ -8,6 +8,8 @@ and includes network connection handling.
 
 import os
 import time
+import shutil
+import subprocess
 from yt_dlp import YoutubeDL
 import inquirer
 from dotenv import load_dotenv
@@ -139,6 +141,54 @@ class VideoDownloader:
                     time.sleep(5)
                 print("Connection restored. Resumption of download...")
 
+    def detect_browser(self):
+        """
+        Detect installed browser for extracting cookies.
+
+        Checks for presence of popular browsers in system PATH and returns
+        the first match among Firefox, Chrome, Chromium, Edge, and Brave.
+
+        Returns:
+            str or None: Name of the browser if found, otherwise None.
+        """
+        for name in ('firefox', 'chrome', 'chromium', 'edge', 'brave'):
+            if shutil.which(name):
+                return name
+        return None
+
+    def run_yt_dlp_with_cookies(self, output_path):
+        """
+        Attempt to download video using browser cookies.
+
+        Builds and executes an yt-dlp command with cookies from the detected browser
+        to bypass age or login restrictions. If no supported browser is found,
+        retries without cookies.
+
+        Args:
+            output_path (str): Output file template for yt-dlp (including path and extension).
+        """
+        browser = self.detect_browser()
+        base_cmd = [
+            'yt-dlp',
+            '-f', self.QUALITY_MAP[self.quality],
+            '-o', output_path,
+            '--merge-output-format', self.output_format.lower(),
+            self.url
+        ]
+        if browser:
+            print(f"Using cookies from '{browser}' to bypass age restriction...")
+            base_cmd.insert(-1, '--cookies-from-browser')
+            base_cmd.insert(-1, browser)
+        else:
+            print("No supported browser found for cookies—instead retrying without cookies.")
+
+        try:
+            subprocess.run(base_cmd, capture_output=True, text=True, check=True)
+            print("\nSuccessful download with cookies retry!")
+        except subprocess.CalledProcessError as e:
+            print("\nFailed even with cookies. Error output:")
+            print(e.stderr or e.stdout)
+
     @ffmpeg_required
     @network_required
     @timed
@@ -172,3 +222,10 @@ class VideoDownloader:
             print("\nError: Insufficient permissions to save the file.")
         except KeyboardInterrupt:
             print("\nDownload interrupted by user.")
+        except Exception as e:
+            msg = str(e).lower()
+            if 'verify' in msg and ('age' in msg or 'signed in' in msg):
+                print("\nVideo requires age verification—retrying with browser cookies.")
+                self.run_yt_dlp_with_cookies(output_path)
+            else:
+                print(f"\nDownload error: {e}")
