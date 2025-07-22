@@ -18,18 +18,25 @@ class ListService:
         """
         self.session = session
 
-    def add_item(self, title: str, link: str) -> ListModel:
+    def add_item(self, title: str, link: str, quality: str, output_format: str) -> ListModel:
         """
-        Adds a new movie entry to the database.
+        Adds a new movie to download to the database.
 
         Args:
-            title (str): Title of the movie.
-            link (str): Download link for the movie.
+            title (str): Title or name of the movie.
+            link (str): URL associated with the movie.
+            quality (str): Desired download quality.
+            output_format (str): Desired output format.
 
         Returns:
             ListModel: The created ListModel object with all fields populated.
         """
-        item = ListModel(title=title, link=link)
+        item = ListModel(
+            title=title,
+            link=link,
+            quality=quality,
+            output_format=output_format
+        )
         self.session.add(item)
         self.session.commit()
         self.session.refresh(item)
@@ -56,18 +63,47 @@ class ListService:
         """
         return self.session.query(ListModel).all()
 
-    def list_pending(self) -> list[ListModel]:
+    def list_active(self) -> list[ListModel]:
         """
-        Returns a list of movies that have not been downloaded yet.
+        Returns a list of movie entries that are not completed.
 
         Returns:
-            list[ListModel]: A list of pending movie entries.
+            list[ListModel]: Pending movie entries.
         """
-        return self.session.query(ListModel).filter_by(downloaded=False).all()
+        return self.session.query(ListModel).filter_by(completed=False).all()
 
-    def mark_downloaded(self, item_id: int) -> bool:
+    def list_completed(self) -> list[ListModel]:
         """
-        Marks a movie entry as downloaded.
+        Returns a list of movie entries that have been completed.
+
+        Returns:
+            list[ListModel]: Completed movie entries.
+        """
+        return self.session.query(ListModel).filter_by(completed=True).all()
+    
+    def update_item(self, item_id: int, **kwargs) -> bool:
+        """
+        Updates fields of an existing movie entry.
+
+        Args:
+            item_id (int): ID of the movie entry.
+            **kwargs: Fields to update (title, link, quality, output_format, completed).
+
+        Returns:
+            bool: True if update was successful, False if the item does not exist.
+        """
+        item = self.get_item(item_id)
+        if not item:
+            return False
+        for key, value in kwargs.items():
+            if hasattr(item, key):
+                setattr(item, key, value)
+        self.session.commit()
+        return True
+
+    def mark_completed(self, item_id: int) -> bool:
+        """
+        Marks a movie entry as completed.
 
         Args:
             item_id (int): ID of the movie entry.
@@ -75,12 +111,7 @@ class ListService:
         Returns:
             bool: True if the update was successful, False if the item does not exist.
         """
-        item = self.get_item(item_id)
-        if not item:
-            return False
-        item.downloaded = True
-        self.session.commit()
-        return True
+        return self.update_item(item_id, completed=True)
 
     def delete_item(self, item_id: int) -> bool:
         """

@@ -18,13 +18,19 @@ class ListModel(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String, nullable=False)
     link = Column(String, nullable=False)
-    downloaded = Column(Boolean, default=False, nullable=False)
+    quality = Column(String, nullable=False)
+    output_format = Column(String, nullable=False)
+    completed = Column(Boolean, default=False, nullable=False)
 
     def __repr__(self) -> str:
         """
-        Returns a string representation of the ListModel instance.
+        Returns a string representation of the TodoModel instance.
 
         Returns:
-            str: A formatted string containing the id, title, and download status.
+            str: A formatted string containing id, title, and completion status.
         """
-        return f"<ListModel(id={self.id}, title='{self.title}', downloaded={self.downloaded})>"
+        return (
+            f"<TodoModel(id={self.id}, title='{self.title}', "
+            f"quality='{self.quality}', format='{self.output_format}', "
+            f"completed={self.completed})>"
+        )

@@ -55,8 +55,7 @@ class ModernNavBar:
                                     weight="bold", opacity=1,
                                     animate_opacity=200),
                             ft.Text(value=description, size=9, 
-                                    weight="w400", 
-                                    # color="white54", 
+                                    weight="w400",
                                     opacity=1, animate_opacity=200),
                         ]
                     )

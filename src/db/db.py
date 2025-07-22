@@ -11,7 +11,6 @@ from sqlalchemy.orm import sessionmaker
 from src.models.base import Base
 from src.services.list_service import ListService
 
-# Create database engine and initialize tables
 engine = create_engine('sqlite:///movies.db', echo=True)
 Base.metadata.create_all(engine)
 SessionLocal = sessionmaker(bind=engine)
