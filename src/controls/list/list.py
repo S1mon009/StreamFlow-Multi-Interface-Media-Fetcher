@@ -1,9 +1,35 @@
+"""
+Module for managing a download task list UI using Flet.
+Defines the List class which handles task creation, display, filtering, and completion status.
+"""
+
 import flet as ft
 from src.controls.list.task import Task
 from src.db.db import create_services
 
+
 class List(ft.Column):
+    """
+    A UI component representing a task list for downloads.
+
+    Attributes:
+        service: Service object for database operations.
+        input_task: TextField for entering task names.
+        input_link: TextField for entering download links.
+        input_quality: Dropdown for selecting download quality.
+        input_format: Dropdown for selecting file format.
+        rows_container: Column containing all task display rows.
+        tasks: List of Task objects.
+        filter: Tabs for filtering tasks (Active/Completed).
+        items_left: Text displaying count of selected tasks.
+        set_completed_button: Button to mark selected tasks as completed.
+    """
+
     def __init__(self):
+        """
+        Initializes the List component, loads existing tasks from the service,
+        and sets up the UI elements including input fields, buttons, and filters.
+        """
         super().__init__()
 
         services = create_services()
@@ -62,7 +88,6 @@ class List(ft.Column):
 
         self.controls = [inputs, self.filter, self.rows_container, footer]
 
-        # Wczytanie istniejących
         for item in self.service.list_all():
             task = Task(
                 item.title, item.quality, item.output_format, item.link,
@@ -75,6 +100,10 @@ class List(ft.Column):
         self.update_counts()
 
     def add_clicked(self, e):
+        """
+        Handles the click event of the add button.
+        Creates a new task and updates the UI with the new task.
+        """
         name = self.input_task.value
         link = self.input_link.value
         quality = self.input_quality.value
@@ -98,29 +127,35 @@ class List(ft.Column):
             self.update()
 
     def task_status_change(self, task):
-        self.apply_filter()    # filtruje zadania według Active/Completed
-        self.update_counts()   # aktualizuje licznik
-        self.update()          # odświeża UI
-        
+        """
+        Updates the display and counts when a task's completion status changes.
+        """
+        self.apply_filter()
+        self.update_counts()
+        self.update()
+
     def set_as_completed_clicked(self, e):
-        # działa tylko w Active
+        """
+        Marks all selected active tasks as completed and updates the UI accordingly.
+        """
         for task in self.tasks:
             if not task.completed and task.checkbox.value:
                 task.completed = True
-                task.checkbox.value = False  # po zmianie odznaczamy
+                task.checkbox.value = False
                 if task.service and task.db_id:
                     task.service.update_item(task.db_id, completed=True)
-                # odbudowa row, aby kosz zniknął
                 idx = self.rows_container.controls.index(task.display_row)
                 self.rows_container.controls[idx] = task.build_display_row()
                 task.display_row = self.rows_container.controls[idx]
 
-        # odśwież widok i liczniki
         self.apply_filter()
         self.update_counts()
         self.update()
-    
+
     def task_delete(self, task):
+        """
+        Deletes a task from the task list and updates the UI.
+        """
         if task in self.tasks:
             self.tasks.remove(task)
             if task.display_row in self.rows_container.controls:
@@ -129,11 +164,17 @@ class List(ft.Column):
         self.update()
 
     def tabs_changed(self, e):
+        """
+        Updates the display when the filter tab (Active/Completed) is changed.
+        """
         self.apply_filter()
-        self.update_counts()  # <- odświeżenie stopki po zmianie zakładki
+        self.update_counts()
         self.update()
 
     def apply_filter(self):
+        """
+        Filters the displayed tasks according to the selected tab (Active or Completed).
+        """
         mode = self.filter.tabs[self.filter.selected_index].text
         self.rows_container.controls.clear()
         for task in self.tasks:
@@ -143,10 +184,14 @@ class List(ft.Column):
                 self.rows_container.controls.append(task.display_row)
 
     def update_counts(self):
-        if self.filter.selected_index == 0:  # Active
+        """
+        Updates the items_left text and visibility of the set_completed_button
+        based on the current tab and selected tasks.
+        """
+        if self.filter.selected_index == 0:
             selected = sum(1 for task in self.tasks if not task.completed and task.checkbox.value)
             self.items_left.value = f"{selected} item(s) selected"
             self.set_completed_button.visible = True
-        else:  # Completed
-            self.items_left.value = ""  # lub np. "Completed"
+        else:
+            self.items_left.value = ""
             self.set_completed_button.visible = False

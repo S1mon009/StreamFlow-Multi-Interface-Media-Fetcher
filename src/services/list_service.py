@@ -9,6 +9,17 @@ from sqlalchemy.orm import Session
 from src.models.list_model import ListModel
 
 class ListService:
+    """
+    Service class for managing movie download entries in the database.
+
+    This class provides methods to perform CRUD operations on the ListModel,
+    including adding new entries, retrieving specific entries, listing all,
+    listing only active or completed entries, updating fields, marking entries
+    as completed, and deleting entries.
+
+    Attributes:
+        session (Session): SQLAlchemy session used for database operations.
+    """
     def __init__(self, session: Session):
         """
         Initializes the service with the given SQLAlchemy session.
