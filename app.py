@@ -1,16 +1,12 @@
-"""
-Entry point of the application.
-
-Initializes services and starts the Flet application.
-"""
-import sys
-import os
-sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
-import flet as ft
-from src.main import main
-from src.db.db import create_services
+from fastapi import FastAPI
+from routes.download import router
+from middlewares.network_required import network_middleware
+from middlewares.timed import timed_middleware
 
 
-if __name__ == "__main__":
-    services = create_services()
-    ft.app(target=main)
+app = FastAPI(title="YouTube Video Downloader API", version="1.0")
+
+app.middleware("http")(network_middleware)
+app.middleware("http")(timed_middleware)
+
+app.include_router(router, prefix="/api", tags=["Downloader"])
