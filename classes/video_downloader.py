@@ -1,9 +1,10 @@
 """
 Video Downloader Module
 
-This module provides a VideoDownloader class that allows users to download videos and playlists 
-from YouTube using yt_dlp. It supports multiple quality options, output formats, 
-and includes network connection handling.
+This module provides a VideoDownloader class that allows users to download videos, audio,
+and playlists from YouTube using yt_dlp. It supports multiple quality options, output formats,
+and includes network connection handling. It also allows downloading from a .txt file
+containing multiple links.
 """
 
 import os
@@ -17,25 +18,26 @@ from decorators.timed import timed
 from decorators.ffmpeg import ffmpeg_required
 from decorators.connected import is_connected, network_required
 
+
 class VideoDownloader:
     """
-    A class to handle video downloading from YouTube.
+    A class to handle video/audio downloading.
 
     Features:
-    - Allows downloading single videos and playlists.
-    - Provides various quality options.
+    - Allows downloading single videos, audio, playlists, or multiple links from file.
+    - Provides various quality options for video.
     - Supports multiple output formats.
     - Handles network disconnections gracefully.
     - Ensures the download folder is correctly set.
     """
 
     QUALITY_MAP = {
-    'The best': 'bestvideo+bestaudio/best',
-    'Medium (1440p)': 'bestvideo[height<=1440]+bestaudio/best[height<=1440]',
-    'Above High (1080p)': 'bestvideo[height<=1080]+bestaudio/best[height<=1080]',
-    'High (720p)': 'bestvideo[height<=720]+bestaudio/best[height<=720]',
-    'Low (<=480p)': 'bestvideo[height<=480]+bestaudio/best[height<=480]'
-}
+        'The best': 'bestvideo+bestaudio/best',
+        'Medium (1440p)': 'bestvideo[height<=1440]+bestaudio/best[height<=1440]',
+        'Above High (1080p)': 'bestvideo[height<=1080]+bestaudio/best[height<=1080]',
+        'High (720p)': 'bestvideo[height<=720]+bestaudio/best[height<=720]',
+        'Low (<=480p)': 'bestvideo[height<=480]+bestaudio/best[height<=480]'
+    }
     OUTPUT_FORMATS = ['Mkv', 'Mp4']
 
     def __init__(self):
@@ -43,18 +45,20 @@ class VideoDownloader:
         self.download_folder = os.getenv('DOWNLOAD_FOLDER',
                                          os.path.join(os.path.expanduser("~"), "Downloads"))
         self.verify_download_folder()
-        self.url = None
+
+        self.urls = []
         self.quality = None
         self.output_format = None
         self.is_playlist = False
         self.playlist_folder = None
+        self.mode = None
 
     def verify_download_folder(self):
-        """It checks if the default download path is correct, 
+        """It checks if the default download path is correct,
         and if not - it allows you to change."""
         question = [
             inquirer.Confirm('use_default',
-                             message=f"Is the default download path ({self.download_folder}) is correct?",
+                             message=f"Is the default download path ({self.download_folder}) correct?",
                              default=True)
         ]
         answer = inquirer.prompt(question)
@@ -67,52 +71,83 @@ class VideoDownloader:
             os.makedirs(self.download_folder)
 
     def prompt_user_options(self):
-        """It takes from the user downloads URL, quality options, output format and - 
-        in the case of a playlist - an additional folder."""
-
-        url_answer = inquirer.prompt([
-            inquirer.Text('url', message="Enter the link to YouTube")
+        """Collect user options: source of links, mode, quality/format, playlist folder."""
+        source_ans = inquirer.prompt([
+            inquirer.List('source',
+                          message="Choose source of links",
+                          choices=['Single URL', 'TXT File'])
         ])
-        self.url = url_answer.get('url')
+        source = source_ans.get('source')
 
-        self.is_playlist = self.check_if_playlist(self.url)
-        if self.is_playlist:
-            folder_ans = inquirer.prompt([
-                inquirer.Text('playlist_folder', message="Enter the name of the playlist folder")
+        if source == 'Single URL':
+            url_answer = inquirer.prompt([
+                inquirer.Text('url', message="Enter the video link")
             ])
-            self.playlist_folder = os.path.join(self.download_folder,
-                                                folder_ans.get('playlist_folder'))
+            self.urls = [url_answer.get('url')]
 
-            if not os.path.exists(self.playlist_folder):
-                os.makedirs(self.playlist_folder)
+            if 'list=' in self.urls[0]:
+                self.is_playlist = True
+                folder_ans = inquirer.prompt([
+                    inquirer.Text('playlist_folder', message="Enter the name of the playlist folder")
+                ])
+                self.playlist_folder = os.path.join(self.download_folder, folder_ans.get('playlist_folder'))
+                if not os.path.exists(self.playlist_folder):
+                    os.makedirs(self.playlist_folder)
 
-        quality_ans = inquirer.prompt([
-            inquirer.List('quality',
-                          message="Choose quality",
-                          choices=list(self.QUALITY_MAP.keys()))
+        else:
+            file_answer = inquirer.prompt([
+                inquirer.Text('file', message="Enter the path to the TXT file with links")
+            ])
+            filepath = file_answer.get('file')
+
+            if not os.path.exists(filepath):
+                print(f"Error: File {filepath} not found.")
+                self.urls = []
+            elif not os.path.isfile(filepath):
+                print(f"Error: {filepath} is not a file.")
+                self.urls = []
+            else:
+                with open(filepath, "r", encoding="utf-8") as f:
+                    self.urls = [line.strip() for line in f if line.strip()]
+
+        mode_ans = inquirer.prompt([
+            inquirer.List('mode',
+                          message="Choose download mode",
+                          choices=['Video', 'Audio only'])
         ])
-        self.quality = quality_ans.get('quality')
+        self.mode = mode_ans.get('mode')
 
-        format_ans = inquirer.prompt([
-            inquirer.List('output_format',
-                          message="Choose the output format",
-                          choices=self.OUTPUT_FORMATS)
-        ])
-        self.output_format = format_ans.get('output_format')
+        if self.mode == 'Video':
+            quality_ans = inquirer.prompt([
+                inquirer.List('quality',
+                              message="Choose quality",
+                              choices=list(self.QUALITY_MAP.keys()))
+            ])
+            self.quality = quality_ans.get('quality')
+
+            format_ans = inquirer.prompt([
+                inquirer.List('output_format',
+                              message="Choose the output format",
+                              choices=self.OUTPUT_FORMATS)
+            ])
+            self.output_format = format_ans.get('output_format')
 
     def confirm_options(self):
         """Displays the summary of selected options and asks the user to confirm."""
         summary = (
             f"\nSummary of selected options:\n"
             f"-----------------------------------\n"
-            f"URL: {self.url}\n"
-            f"Type: {'Playlist' if self.is_playlist else 'Single video'}\n"
+            f"Number of links: {len(self.urls)}\n"
+            f"Mode: {self.mode}\n"
         )
+        if self.mode == "Video":
+            summary += (
+                f"Quality: {self.quality}\n"
+                f"Output format: {self.output_format}\n"
+            )
         if self.is_playlist:
-            summary += f"Folder for a playlist: {self.playlist_folder}\n"
+            summary += f"Playlist folder: {self.playlist_folder}\n"
         summary += (
-            f"Quality: {self.quality}\n"
-            f"Output format: {self.output_format}\n"
             f"Download folder: {self.download_folder}\n"
             f"-----------------------------------\n"
         )
@@ -122,65 +157,40 @@ class VideoDownloader:
         ])
         return confirm.get('confirm')
 
-    def check_if_playlist(self, url):
-        """
-        Checks that the given link concerns a playlist.
-        We recognize that if there is a 'list =' parameter in URL, it is a playlist.
-        """
-        return 'list=' in url
-
     def progress_hook(self, d):
-        """
-        Function caused periodically by YT-DLP.
-        If the connection is lost - it suspends the action until the connection is restored.
-        """
+        """Hook for monitoring download progress and connection."""
         if d.get('status') == 'downloading':
             if not is_connected():
-                print("\nThe connection to the network was lost when downloading. Suspension of download...")
+                print("\nNetwork lost. Pausing download...")
                 while not is_connected():
                     time.sleep(5)
-                print("Connection restored. Resumption of download...")
+                print("Connection restored. Resuming download...")
 
     def detect_browser(self):
-        """
-        Detect installed browser for extracting cookies.
-
-        Checks for presence of popular browsers in system PATH and returns
-        the first match among Firefox, Chrome, Chromium, Edge, and Brave.
-
-        Returns:
-            str or None: Name of the browser if found, otherwise None.
-        """
+        """Detect installed browser for extracting cookies."""
         for name in ('firefox', 'chrome', 'chromium', 'edge', 'brave'):
             if shutil.which(name):
                 return name
         return None
 
-    def run_yt_dlp_with_cookies(self, output_path):
-        """
-        Attempt to download video using browser cookies.
-
-        Builds and executes an yt-dlp command with cookies from the detected browser
-        to bypass age or login restrictions. If no supported browser is found,
-        retries without cookies.
-
-        Args:
-            output_path (str): Output file template for yt-dlp (including path and extension).
-        """
+    def run_yt_dlp_with_cookies(self, output_path, url):
+        """Retry with browser cookies if needed."""
         browser = self.detect_browser()
-        base_cmd = [
-            'yt-dlp',
-            '-f', self.QUALITY_MAP[self.quality],
-            '-o', output_path,
-            '--merge-output-format', self.output_format.lower(),
-            self.url
-        ]
+        base_cmd = ['yt-dlp', '-o', output_path, url]
+
+        if self.mode == "Video":
+            base_cmd.insert(1, '-f')
+            base_cmd.insert(2, self.QUALITY_MAP[self.quality])
+            base_cmd.extend(['--merge-output-format', self.output_format.lower()])
+        else:  # Audio
+            base_cmd.extend(['-f', 'bestaudio/best', '--extract-audio', '--audio-format', 'mp3'])
+
         if browser:
-            print(f"Using cookies from '{browser}' to bypass age restriction...")
+            print(f"Using cookies from '{browser}'...")
             base_cmd.insert(-1, '--cookies-from-browser')
             base_cmd.insert(-1, browser)
         else:
-            print("No supported browser found for cookies—instead retrying without cookies.")
+            print("No supported browser found for cookies.")
 
         try:
             subprocess.run(base_cmd, capture_output=True, text=True, check=True)
@@ -193,39 +203,49 @@ class VideoDownloader:
     @network_required
     @timed
     def download_video(self):
-        """Configures the YT-DLP options and performs download."""
-        if self.is_playlist:
-            output_path = os.path.join(self.playlist_folder, '%(title)s.%(ext)s')
-        else:
-            output_path = os.path.join(self.download_folder, '%(title)s.%(ext)s')
-
-        ydl_opts = {
-            'format': self.QUALITY_MAP[self.quality],
-            'merge_output_format': self.output_format.lower(),
-            'outtmpl': output_path,
-            'noplaylist': not self.is_playlist,
-            'quiet': False,
-            'progress_hooks': [self.progress_hook],
-            'postprocessors': [{
-                'key': 'FFmpegVideoConvertor',
-                'preferedformat': self.output_format.lower()
-            }],
-        }
-
-        try:
-            with YoutubeDL(ydl_opts) as ydl:
-                ydl.download([self.url])
-            print("\nSuccessful download.")
-        except FileNotFoundError:
-            print("\nError: Specified download folder does not exist.")
-        except PermissionError:
-            print("\nError: Insufficient permissions to save the file.")
-        except KeyboardInterrupt:
-            print("\nDownload interrupted by user.")
-        except Exception as e:
-            msg = str(e).lower()
-            if 'verify' in msg and ('age' in msg or 'signed in' in msg):
-                print("\nVideo requires age verification—retrying with browser cookies.")
-                self.run_yt_dlp_with_cookies(output_path)
+        """Download all links in the chosen mode."""
+        for url in self.urls:
+            is_playlist = 'list=' in url
+            if is_playlist and self.playlist_folder:
+                output_path = os.path.join(self.playlist_folder, '%(title)s.%(ext)s')
             else:
-                print(f"\nDownload error: {e}")
+                output_path = os.path.join(self.download_folder, '%(title)s.%(ext)s')
+
+            if self.mode == "Video":
+                ydl_opts = {
+                    'format': self.QUALITY_MAP.get(self.quality, 'bestvideo+bestaudio/best'),
+                    'merge_output_format': self.output_format.lower(),
+                    'outtmpl': output_path,
+                    'noplaylist': not is_playlist,
+                    'quiet': False,
+                    'progress_hooks': [self.progress_hook],
+                    'postprocessors': [{
+                        'key': 'FFmpegVideoConvertor',
+                        'preferedformat': self.output_format.lower()
+                    }],
+                }
+            else:
+                ydl_opts = {
+                    'format': 'bestaudio/best',
+                    'outtmpl': output_path.replace("%(ext)s", "mp3"),
+                    'noplaylist': not is_playlist,
+                    'quiet': False,
+                    'progress_hooks': [self.progress_hook],
+                    'postprocessors': [{
+                        'key': 'FFmpegExtractAudio',
+                        'preferredcodec': 'mp3',
+                        'preferredquality': '192',
+                    }],
+                }
+
+            try:
+                with YoutubeDL(ydl_opts) as ydl:
+                    ydl.download([url])
+                print(f"\nSuccessful download: {url}")
+            except Exception as e:
+                msg = str(e).lower()
+                if 'verify' in msg and ('age' in msg or 'signed in' in msg):
+                    print("\nVideo requires verification—retrying with cookies.")
+                    self.run_yt_dlp_with_cookies(output_path, url)
+                else:
+                    print(f"\nDownload error for {url}: {e}")
