@@ -10,7 +10,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from src.models import Base
 # from src.models.base import Base
-from src.services import ListService
+from src.services import ListService, SettingsService
 
 engine = create_engine('sqlite:///movies.db', echo=True)
 Base.metadata.create_all(engine)
@@ -34,7 +34,9 @@ def create_services():
     """
     session = get_session()
     list_service = ListService(session)
+    settings_service = SettingsService(session)
 
     return {
         'list_service': list_service,
+        'settings_service': settings_service,
     }

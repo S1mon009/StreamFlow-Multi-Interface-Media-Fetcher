@@ -6,6 +6,7 @@ Defines the List class which handles task creation, display, filtering, and comp
 import flet as ft
 from src.controls.list.task import Task
 from src.db.db import create_services
+from src.config import OUTPUT_OPTIONS
 
 
 class List(ft.Column):
@@ -51,7 +52,7 @@ class List(ft.Column):
             label="Quality",
             width=130,
             value="1080p",
-            options=[ft.dropdown.Option(o) for o in ["The best", "1440p", "1080p", "720p", ">=480p"]],
+            options=[ft.dropdown.Option(o) for o in OUTPUT_OPTIONS["video"]["qualities"]],
             border_color=ft.Colors.SECONDARY_CONTAINER,
             focused_border_color=ft.Colors.PRIMARY
         )

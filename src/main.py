@@ -5,6 +5,7 @@ This module initializes the Flet app window and renders the sidebar layout.
 '''
 import flet as ft
 from views import route_change
+from src.db.db import create_services
 
 def main(page: ft.Page) -> None:
     """
@@ -18,6 +19,10 @@ def main(page: ft.Page) -> None:
     """
     def on_route_change(e) -> None:
         route_change(e, page)
+        
+    services = create_services()
+    service = services["settings_service"]
+    settings = service.get_settings()
 
     page.title = "YT Downloader"
     page.horizontal_alignment = "start"
@@ -25,5 +30,6 @@ def main(page: ft.Page) -> None:
     page.padding = 0
     page.theme = ft.Theme(color_scheme_seed=ft.Colors.BLUE)
     page.dark_theme = ft.Theme(color_scheme_seed=ft.Colors.BLUE_GREY_900)
+    page.theme_mode = ft.ThemeMode.DARK if settings.theme == "dark" else ft.ThemeMode.LIGHT
     page.on_route_change = on_route_change
     page.go("/download")
