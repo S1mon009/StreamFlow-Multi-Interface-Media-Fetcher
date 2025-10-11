@@ -6,7 +6,7 @@ It provides methods to add, retrieve, list, update, and delete movie items.
 """
 
 from sqlalchemy.orm import Session
-from src.models.list_model import ListModel
+from src.models import ListModel
 
 class ListService:
     """

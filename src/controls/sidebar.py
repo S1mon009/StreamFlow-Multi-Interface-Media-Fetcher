@@ -1,5 +1,5 @@
 """
-Modern navigation sidebar for a Flet-based YouTube downloader UI.
+Modern navigation sidebar for a Flet-based video downloader UI.
 
 This module defines the ModernNavBar class to build a collapsible sidebar with
 user information and navigation icons, and includes a layout function to render
@@ -120,7 +120,7 @@ class ModernNavBar:
             alignment=ft.MainAxisAlignment.START,
             horizontal_alignment="center",
             controls=[
-                self.user_data("YT", "YT-Downloader", "Easy use yt-downloader"),
+                self.user_data("SV", "SV-Downloader", "Easy use video downloader"),
                 ft.Divider(height=5, color=ft.Colors.SECONDARY_CONTAINER),
                 self.contained_icon(ft.Icons.DASHBOARD_ROUNDED, "Download", link="/download"),
                 self.contained_icon(ft.Icons.BAR_CHART, "Statistics", link="/statistics"),

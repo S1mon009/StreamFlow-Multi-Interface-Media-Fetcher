@@ -1,6 +1,6 @@
 import flet as ft
 
-def statistics_view(page: ft.Page):
+def statistics_view(page: ft.Page) -> ft.Row:
     return ft.Row(
         spacing=0,
         controls=[

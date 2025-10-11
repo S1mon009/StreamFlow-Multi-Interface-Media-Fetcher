@@ -6,10 +6,10 @@ and adds it to `page.views`, combining the selected view with the sidebar layout
 """
 import flet as ft
 from src.controls.sidebar import create_layout
-from src.views.download_view import download_view
-from src.views.list_view import list_view
-from src.views.settings_view import settings_view
-from src.views.statistics_view import statistics_view
+from src.views import download_view
+from src.views import list_view
+from src.views import settings_view
+from src.views import statistics_view
 
 def route_change(e: ft.RouteChangeEvent, page: ft.Page):
     """

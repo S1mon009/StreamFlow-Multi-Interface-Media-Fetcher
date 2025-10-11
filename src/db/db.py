@@ -8,8 +8,9 @@ and accessing available service instances.
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from src.models.base import Base
-from src.services.list_service import ListService
+from src.models import Base
+# from src.models.base import Base
+from src.services import ListService
 
 engine = create_engine('sqlite:///movies.db', echo=True)
 Base.metadata.create_all(engine)

@@ -1,7 +1,7 @@
 import flet as ft
-from src.controls.list.list import List
+from src.controls.list import List
 
-def list_view(page: ft.Page):
+def list_view(page: ft.Page) -> ft.Row:
     return ft.Row(
         spacing=0,
         controls=[

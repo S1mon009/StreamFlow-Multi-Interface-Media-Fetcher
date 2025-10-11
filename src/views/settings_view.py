@@ -1,6 +1,6 @@
 import flet as ft
 
-def settings_view(page: ft.Page):
+def settings_view(page: ft.Page) -> ft.Row:
     return ft.Row(
         spacing=0,
         controls=[

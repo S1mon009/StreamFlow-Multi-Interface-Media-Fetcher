@@ -4,7 +4,7 @@ Main application entry point for the YouTube Downloader UI built with Flet.
 This module initializes the Flet app window and renders the sidebar layout.
 '''
 import flet as ft
-from views.router import route_change
+from views import route_change
 
 def main(page: ft.Page) -> None:
     """
