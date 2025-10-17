@@ -4,7 +4,6 @@ movie download entries in the database using SQLAlchemy.
 
 It provides methods to add, retrieve, list, update, and delete movie items.
 """
-
 from sqlalchemy.orm import Session
 from src.models import ListModel
 
@@ -20,7 +19,7 @@ class ListService:
     Attributes:
         session (Session): SQLAlchemy session used for database operations.
     """
-    def __init__(self, session: Session):
+    def __init__(self, session: Session) -> None:
         """
         Initializes the service with the given SQLAlchemy session.
 
@@ -91,7 +90,7 @@ class ListService:
             list[ListModel]: Completed movie entries.
         """
         return self.session.query(ListModel).filter_by(completed=True).all()
-    
+
     def update_item(self, item_id: int, **kwargs) -> bool:
         """
         Updates fields of an existing movie entry.

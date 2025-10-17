@@ -1,7 +1,21 @@
+"""
+This module defines the view responsible for displaying the list
+section of the application using Flet components.
+"""
+
 import flet as ft
 from src.controls.list import List
 
 def list_view(page: ft.Page) -> ft.Row:
+    """
+    Creates and returns the list view layout.
+
+    Args:
+        page (ft.Page): The current Flet page instance.
+
+    Returns:
+        ft.Row: A row containing the List component with defined layout settings.
+    """
     return ft.Row(
         spacing=0,
         controls=[

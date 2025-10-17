@@ -1,7 +1,6 @@
 """
 Provides CRUD operations for SettingsModel using SQLAlchemy.
 """
-
 from sqlalchemy.orm import Session
 from src.models.settings_model import SettingsModel
 

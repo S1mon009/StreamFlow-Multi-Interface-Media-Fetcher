@@ -1,3 +1,8 @@
+"""
+This module defines the settings view for the application.
+It provides UI components for managing user preferences such as theme,
+default quality, formats, and download path, using Flet and SettingsService.
+"""
 import flet as ft
 from src.db.db import create_services
 from src.config import THEME, OUTPUT_OPTIONS
@@ -11,22 +16,22 @@ def settings_view(page: ft.Page) -> ft.Row:
     service = services["settings_service"]
     settings = service.get_settings()
 
-    def on_theme_change(e: ft.ControlEvent):
+    def on_theme_change(e: ft.ControlEvent) -> None:
         new_theme = e.control.value
         page.theme_mode = ft.ThemeMode.DARK if new_theme == "dark" else ft.ThemeMode.LIGHT
         page.update()
         service.update_settings(theme=new_theme)
 
-    def on_change(e: ft.ControlEvent):
+    def on_change(e: ft.ControlEvent) -> None:
         key = e.control.data
         value = e.control.value
         service.update_settings(**{key: value})
 
-    def on_path_change(e: ft.ControlEvent):
+    def on_path_change(e: ft.ControlEvent) -> None:
         new_path = e.control.value
         service.update_settings(default_download_path=new_path)
 
-    def on_reset_click(e: ft.ControlEvent):
+    def on_reset_click(e: ft.ControlEvent) -> None:
         service.update_settings(
             theme="light",
             default_quality="The best",
@@ -120,7 +125,6 @@ def settings_view(page: ft.Page) -> ft.Row:
         horizontal_alignment=ft.CrossAxisAlignment.START,
     )
 
-    # --- LAYOUT ---
     return ft.Row(
         spacing=0,
         controls=[

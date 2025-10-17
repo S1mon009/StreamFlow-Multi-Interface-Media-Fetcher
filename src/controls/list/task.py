@@ -2,9 +2,8 @@
 Module for representing individual download tasks in the Flet UI.
 Defines the Task class with display, editing, completion, and deletion functionalities.
 """
-
 import flet as ft
-
+from config import OUTPUT_OPTIONS
 
 class Task:
     """
@@ -109,13 +108,13 @@ class Task:
         )
         self.edit_quality = ft.Dropdown(
             value=self.quality,
-            options=[ft.dropdown.Option(o) for o in ["The best", "1440p", "1080p", "720p", ">=480p"]],
+            options=[ft.dropdown.Option(o) for o in OUTPUT_OPTIONS["video"]["qualities"]],
             border_color=ft.Colors.SECONDARY_CONTAINER,
             focused_border_color=ft.Colors.PRIMARY
         )
         self.edit_format = ft.Dropdown(
             value=self.output_format,
-            options=[ft.dropdown.Option(o) for o in ["Mkv", "Mp4"]],
+            options=[ft.dropdown.Option(o) for o in OUTPUT_OPTIONS["video"]["formats"]],
             border_color=ft.Colors.SECONDARY_CONTAINER,
             focused_border_color=ft.Colors.PRIMARY
         )

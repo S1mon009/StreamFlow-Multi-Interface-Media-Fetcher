@@ -2,7 +2,6 @@
 Module for managing a download task list UI using Flet.
 Defines the List class which handles task creation, display, filtering, and completion status.
 """
-
 import flet as ft
 from src.controls.list.task import Task
 from src.db.db import create_services
@@ -35,7 +34,8 @@ class List(ft.Column):
 
         services = create_services()
         self.service = services['list_service']
-
+        self.default_settings = services['settings_service'].get_settings()
+       
         self.input_task = ft.TextField(
             hint_text="What would you like to download?",
             border_color=ft.Colors.SECONDARY_CONTAINER,
@@ -51,16 +51,16 @@ class List(ft.Column):
         self.input_quality = ft.Dropdown(
             label="Quality",
             width=130,
-            value="1080p",
+            value=self.default_settings.default_quality or "1080p",
             options=[ft.dropdown.Option(o) for o in OUTPUT_OPTIONS["video"]["qualities"]],
             border_color=ft.Colors.SECONDARY_CONTAINER,
             focused_border_color=ft.Colors.PRIMARY
         )
         self.input_format = ft.Dropdown(
             label="Format",
-            width=100,
-            value="Mkv",
-            options=[ft.dropdown.Option(o) for o in ["Mkv", "Mp4"]],
+            width=130,
+            value=self.default_settings.default_video_format,
+            options=[ft.dropdown.Option(o) for o in OUTPUT_OPTIONS["video"]["formats"]],
             border_color=ft.Colors.SECONDARY_CONTAINER,
             focused_border_color=ft.Colors.PRIMARY
         )

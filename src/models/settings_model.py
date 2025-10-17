@@ -1,7 +1,6 @@
 """
 Defines the SettingsModel ORM class, storing application configuration.
 """
-
 from sqlalchemy import Column, Integer, String
 from src.models.base import Base
 
@@ -13,7 +12,7 @@ class SettingsModel(Base):
     __tablename__ = "settings_model"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    theme = Column(String, default="light", nullable=False)  # light / dark
+    theme = Column(String, default="light", nullable=False)
     default_quality = Column(String, default="The best", nullable=False)
     default_video_format = Column(String, default="mp4", nullable=False)
     default_audio_format = Column(String, default="mp3", nullable=False)

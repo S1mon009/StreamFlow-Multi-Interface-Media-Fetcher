@@ -1,3 +1,7 @@
+"""
+This module exports all main view functions and the route handler
+used for navigation within the application.
+"""
 from .download_view import download_view
 from .list_view import list_view
 from .settings_view import settings_view

@@ -2,7 +2,6 @@
 This module defines the ListModel class, representing a movie entry
 to be downloaded and stored in the database.
 """
-
 from sqlalchemy import Column, Integer, String, Boolean
 from src.models.base import Base
 
