@@ -1,4 +1,6 @@
 # StreamFlow - Multi-Interface Media Fetcher
+![Static Badge](https://img.shields.io/badge/Python-Python?style=for-the-badge&logo=python&logoColor=%23fefefe&labelColor=%233776AB&color=%233776AB) ![Static Badge](https://img.shields.io/badge/FastAPI-FastAPI?style=for-the-badge&logo=fastapi&logoColor=%23fefefe&labelColor=%23009688&color=%23009688) ![Static Badge](https://img.shields.io/badge/inquirer-FastAPI?style=for-the-badge&logo=inquirer&logoColor=%23333&labelColor=%23F0DB4F&color=%23F0DB4F) 
+
 StreamFlow is a modular Python project that provides three different interfaces for fetching and streaming multimedia content:
 - **API** - FastAPI-based REST API for remote access
 - **CLI** - Command-line interface for local usage
@@ -99,4 +101,5 @@ ffmpeg -version
 ## License
 MIT License - for educational and non-commercial use.
 Always respect third-party content rights.
+
 
