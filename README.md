@@ -1,175 +1,105 @@
-# YouTube Downloader CLI
-![Static Badge](https://img.shields.io/badge/python-python?style=for-the-badge&logo=python&logoColor=%23fefefe&color=%233776AB) ![Static Badge](https://img.shields.io/badge/env-env?style=for-the-badge&logo=dotenv&logoColor=%23333&color=%23ECD53F) ![Static Badge](https://img.shields.io/badge/pydantic-pydantic?style=for-the-badge&logo=pydantic&logoColor=%23fefefe&color=%23E92063) ![Static Badge](https://img.shields.io/badge/youtube-youtube?style=for-the-badge&logo=youtube&logoColor=%23fefefe&color=%23FF0000)
+# StreamFlow - Multi-Interface Media Fetcher
+![Static Badge](https://img.shields.io/badge/Python-Python?style=for-the-badge&logo=python&logoColor=%23fefefe&labelColor=%233776AB&color=%233776AB) ![Static Badge](https://img.shields.io/badge/FastAPI-FastAPI?style=for-the-badge&logo=fastapi&logoColor=%23fefefe&labelColor=%23009688&color=%23009688) ![Static Badge](https://img.shields.io/badge/inquirer-FastAPI?style=for-the-badge&logo=inquirer&logoColor=%23333&labelColor=%23F0DB4F&color=%23F0DB4F) 
 
-A command-line interface (CLI) tool for downloading YouTube videos and playlists with ease, supporting resolution selection, output format conversion, and automatic handling of age-restricted content via browser cookies.
+StreamFlow is a modular Python project that provides three different interfaces for fetching and streaming multimedia content:
+- **API** - FastAPI-based REST API for remote access
+- **CLI** - Command-line interface for local usage
+- **GUI** - Desktop application with a simple graphical interface
 
----
+Each interface is stored on a separate branch:
+- `API` - FastAPI version
+- `CLI` - Command-line version
+- `GUI` - Graphical desktop version
 
-## Table of Contents
-
-1. [Overview](#overview)
-2. [Features](#features)
-3. [Prerequisites](#prerequisites)
-4. [Installation](#installation)
-5. [Configuration](#configuration)
-6. [Usage](#usage)
-   * [Basic Download](#basic-download)
-   * [Age-Restricted Videos](#age-restricted-videos)
-7. [Command-Line Arguments](#command-line-arguments)
-8. [Environment Variables](#environment-variables)
-9. [Troubleshooting](#troubleshooting)
-10. [Contributing](#contributing)
-
----
-
-## Overview
-
-The YouTube Downloader CLI is a robust Python-based utility built on top of [yt-dlp](https://github.com/yt-dlp/yt-dlp) and [FFmpeg](https://ffmpeg.org/). It provides an interactive command-line experience for:
-
-* Downloading single YouTube videos or entire playlists
-* Choosing video quality (up to 1080p or higher if available)
-* Converting or packaging downloads in `mkv` or `mp4` formats via FFmpeg
-* Automatically retrying downloads with browser cookies to bypass age restrictions
-
-This tool is ideal for users who require a simple yet powerful CLI wrapper to manage downloads and handle edge cases like age verification seamlessly.
+> StreamFlow is designed for educational and personal use.
+> It should only be used with **authorized or publicly available sources** (e.g. open media, personal content or internal servers).
 
 ---
 
 ## Features
-
-* **Interactive Prompts**: Easily input URLs, choose quality, and set output formats via guided prompts.
-* **Playlist Support**: Detects if a URL is a playlist and organizes downloads into a named subfolder.
-* **Quality Mapping**: Predefined options:
-
-  * Best available
-  * Above High (1080p)
-  * High (720p)
-  * Medium (1440p)
-  * Low (≤480p)
-* **Output Formats**: `.mkv` or `.mp4`, with FFmpeg post-processing for container conversion.
-* **Age Restriction Handling**: On encountering an age-verification or login error, automatically detects installed browsers (Firefox, Chrome, Chromium, Edge, Brave) and retries with `--cookies-from-browser`.
-* **Resumable Downloads**: Monitors network connectivity; upon disconnect, waits and resumes when online.
-* **Graceful Error Handling**: Handles missing folders, permission issues, and user interrupts.
+- Stream and process media in real time
+- Unified architecture across API, CLI and GUI
+- Modular core logic shared between interfaces
+- Docker-ready deplayment (for API version)
 
 ---
 
-## Prerequisites
-
-Ensure the following are installed on your system:
-
-1. **Python 3.8+**
-2. **yt-dlp**
-
-   ```bash
-   pip install yt-dlp
-   ```
-3. **FFmpeg**
-
-   * macOS: `brew install ffmpeg`
-   * Ubuntu/Debian: `sudo apt install ffmpeg`
-   * Windows: Download from [ffmpeg.org](https://ffmpeg.org/download.html), add to PATH
-4. **Python Dependencies**
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-   This includes:
-
-   * `inquirer`
-   * `python-dotenv`
-   * `yt-dlp`
-   * Custom decorators (`timed`, `ffmpeg_required`, `network_required`)
+## Branch overview
+| Branch | Description | Interface |
+|--------|-------------|-----------|
+| `API` | REST API built with FastAPI | Web |
+| `CLI` | Command-line version | Terminal |
+| `GUI` | Graphical version | Desktop |
 
 ---
 
 ## Installation
-
-1. **Clone the `CLI` branch**
-
-   ```bash
-   git clone --branch CLI https://github.com/S1mon009/YouTube-downloader.git
-   cd YouTube-downloader
-   ```
-2. **Create and activate virtual environment** (optional but recommended)
-
-   ```bash
-   python -m venv venv
-   source venv/bin/activate   # Linux/macOS
-   venv\Scripts\activate    # Windows
-   ```
-3. **Install dependencies**
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-
----
-
-## Configuration
-
-1. **Environment File**: Create a `.env` in the project root to override defaults:
-
-   ```ini
-   # .env
-   DOWNLOAD_FOLDER=/path/to/downloads
-   ```
-2. **Custom Cookies File** (optional): If you prefer a manual cookies file instead of browser integration, modify the `run_yt_dlp_with_cookies()` method to insert `--cookies path/to/cookies.txt`.
-
----
-
-## Usage
-
-Run the main script:
-
+1. Clone the repository
 ```bash
-python main.py
+git clone https://github.com/S1mon009/StreamFlow.git
+cd streamflow
 ```
 
-### Basic Download
+2. Switch to the desired branch
+For example, to use the API version:
+```bash
+git checkout API
+```
 
-1. **Enter URL**: Paste a YouTube video or playlist link.
-2. **Confirm Path**: Accept or change the default download folder.
-3. **Select Quality**: Choose one of the predefined quality presets.
-4. **Select Format**: Choose between `mkv` or `mp4`.
-5. **Confirm and Download**: Review summary and confirm to start.
+Or for the CLI version:
+```bash
+git checkout CLI
+```
 
-### Age-Restricted Videos
+3. Create and activate a virtual environment
+```bash
+python -m venv venv
+source venv/bin/activate   # Linux/macOS
+venv\Scripts\activate      # Windows
+```
 
-If a video requires age verification:
+4. Install dependencies
+```bash
+pip install -r requirements.txt
+```
 
-1. The CLI detects the error.
-2. It automatically scans for installed browsers.
-3. Retries download with `--cookies-from-browser <browser>`.
-4. Falls back to plain download if no supported browser is found.
+6. Install FFmpeg (required)
+
+StreamFlow relies on FFmpeg for handling and processing multimedia content.
+Make sure it is installed and accessible from your system’s PATH.
+
+Linux (Debian/Ubuntu)
+```bash
+sudo apt update
+sudo apt install ffmpeg
+```
+
+macOS (Homebrew)
+```bash
+brew install ffmpeg
+```
+
+Windows
+Download and install FFmpeg from:
+https://ffmpeg.org/download.html
+
+You can verify the installation by running:
+```bash
+ffmpeg -version
+```
 
 ---
 
-## Command-Line Arguments
-
-> **Note:** Currently, the tool is interactive.
-> Future enhancements may include direct flags (e.g., `--url`, `--quality`, `--format`).
-
----
-
-## Environment Variables
-
-* `DOWNLOAD_FOLDER`: Override the default download directory.
+## Example use cases
+- Educational demo for Python interface design
+- Internal media management system
+- Self-hosted streaming tool for authorized content
+- Showcase of backend + CLI + GUI architecture
 
 ---
 
-## Troubleshooting
+## License
+MIT License - for educational and non-commercial use.
+Always respect third-party content rights.
 
-* **`FileNotFoundError`**: Ensure `DOWNLOAD_FOLDER` exists or create it via prompt.
-* **`PermissionError`**: Adjust directory permissions or choose another folder.
-* **`KeyboardInterrupt`**: Use `Ctrl+C` to cancel anytime; partial downloads may remain.
-* **Missing Browser**: Install one of Firefox, Chrome, Chromium, Edge, Brave for age-restriction support.
 
----
-
-## Contributing
-
-1. Fork this repo and checkout the `CLI` branch.
-2. Create a feature branch: `git checkout -b feat/your-feature`.
-3. Commit changes with Conventional Commits.
-4. Push and open a pull request against `CLI`.
